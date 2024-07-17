@@ -22,7 +22,7 @@ switch ($method) {
         $sql = "INSERT INTO projects(name, body, budget, po, pr, created_at, created_by) VALUES(:name, :body, :budget, :po, :pr, :created_at, :created_by)";
         $stmt = $con->prepare($sql);
 
-        if (!$data || empty($data->name) || empty($data->budget) || empty($data->po) || empty($data->pr)) {
+        if (!$data || empty($data->name) || !isset($data->budget) || !isset($data->po) || !isset($data->pr)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'All fields are required.']);
             exit();
@@ -78,7 +78,7 @@ switch ($method) {
         $sql = "UPDATE projects SET name= :name, body =:body, budget =:budget, po =:po, pr =:pr WHERE id = :id";
         $stmt = $con->prepare($sql);
 
-        if (!$data || empty($data->name) || empty($data->budget) || empty($data->po) || empty($data->pr)) {
+        if (!$data || empty($data->name) || !isset($data->budget) || !isset($data->po) || !isset($data->pr)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'All fields are required.']);
             exit();

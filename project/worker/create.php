@@ -22,7 +22,7 @@ switch ($method) {
         $sql = "INSERT INTO project_workers (project_id, name, day, night, hours, cost_day, food, transportation, created_at, created_by) VALUES(:project_id, :name, :day, :night, :hours, :cost_day, :food, :transportation, :created_at, :created_by)";
         $stmt = $con->prepare($sql);
 
-        if (!$data || empty($data->project_id) || empty($data->name) || empty($data->day) || empty($data->night) || empty($data->hours) || empty($data->cost_day) || empty($data->food) || empty($data->transportation)) {
+        if (empty($data->project_id) || empty($data->name) || !isset($data->day) || !isset($data->night) || !isset($data->hours) || !isset($data->cost_day) || !isset($data->food) || !isset($data->transportation)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'All fields are required.']);
             exit();
@@ -88,7 +88,7 @@ switch ($method) {
         $sql = "UPDATE project_workers SET name =:name, day =:day, night =:night, hours =:hours, cost_day =:cost_day, food =:food, transportation =:transportation WHERE id = :id";
         $stmt = $con->prepare($sql);
 
-        if (!$data || empty($data->project_id) || empty($data->name) || empty($data->day) || empty($data->night) || empty($data->hours) || empty($data->cost_day) || empty($data->food) || empty($data->transportation)) {
+        if (empty($data->project_id) || empty($data->name) || !isset($data->day) || !isset($data->night) || !isset($data->hours) || !isset($data->cost_day) || !isset($data->food) || !isset($data->transportation)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'All fields are required.']);
             exit();
