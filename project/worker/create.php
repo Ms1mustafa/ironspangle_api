@@ -22,14 +22,14 @@ switch ($method) {
         $sql = "INSERT INTO project_workers (project_id, name, day, night, hours, cost_day, food, transportation, created_at, created_by) VALUES(:project_id, :name, :day, :night, :hours, :cost_day, :food, :transportation, :created_at, :created_by)";
         $stmt = $con->prepare($sql);
 
-        if (empty($data->project_id) || empty($data->name) || !isset($data->day) || !isset($data->night) || !isset($data->hours) || !isset($data->cost_day) || !isset($data->food) || !isset($data->transportation)) {
+        if (empty($data->project_id) || empty($data->name) || !isset($data->day) || !isset($data->cost_day) || !isset($data->food) || !isset($data->transportation)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'All fields are required.']);
             exit();
         }
         //check if numeric
         //day, night, hours, cost_day, food, transportation
-        if (!is_numeric($data->day) || !is_numeric($data->night) || !is_numeric($data->hours) || !is_numeric($data->cost_day) || !is_numeric($data->food) || !is_numeric($data->transportation)) {
+        if (!is_numeric($data->day) || !is_numeric($data->night ?? 0) || !is_numeric($data->hours ?? 0) || !is_numeric($data->cost_day) || !is_numeric($data->food) || !is_numeric($data->transportation)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'day, night, hours, cost_day, food, transportation must be numeric.']);
             exit();
@@ -88,13 +88,13 @@ switch ($method) {
         $sql = "UPDATE project_workers SET name =:name, day =:day, night =:night, hours =:hours, cost_day =:cost_day, food =:food, transportation =:transportation WHERE id = :id";
         $stmt = $con->prepare($sql);
 
-        if (empty($data->project_id) || empty($data->name) || !isset($data->day) || !isset($data->night) || !isset($data->hours) || !isset($data->cost_day) || !isset($data->food) || !isset($data->transportation)) {
+        if (empty($data->project_id) || empty($data->name) || !isset($data->day) || !isset($data->cost_day) || !isset($data->food) || !isset($data->transportation)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'All fields are required.']);
             exit();
         }
         //check if numeric
-        if (!is_numeric($data->day) || !is_numeric($data->night) || !is_numeric($data->hours) || !is_numeric($data->cost_day) || !is_numeric($data->food) || !is_numeric($data->transportation)) {
+        if (!is_numeric($data->day) || !is_numeric($data->night ?? 0) || !is_numeric($data->hours ?? 0) || !is_numeric($data->cost_day) || !is_numeric($data->food) || !is_numeric($data->transportation)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'day, night, hours, cost_day, food, transportation must be numeric.']);
             exit();
