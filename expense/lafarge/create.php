@@ -88,11 +88,6 @@ switch ($method) {
             echo json_encode(['status' => 400, 'message' => 'cost must be numeric.']);
             exit();
         }
-        if (empty($data->created_by)) {
-            http_response_code(400);
-            echo json_encode(['status' => 400, 'message' => 'Some thing went wrong.']);
-            exit();
-        }
 
         $stmt->bindParam(':item', $data->item);
         $stmt->bindParam(':cost', $data->cost);
