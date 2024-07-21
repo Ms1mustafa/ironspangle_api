@@ -19,10 +19,10 @@ switch ($method) {
 
     case "POST":
         $data = json_decode(file_get_contents("php://input"));
-        $sql = "INSERT INTO project_workers (project_id, name, day, night, hours, cost_day, food, transportation, created_at, created_by) VALUES(:project_id, :name, :day, :night, :hours, :cost_day, :food, :transportation, :created_at, :created_by)";
+        $sql = "INSERT INTO project_workers (project_id, name, day, night, hours, cost_day, cost_hour, food, transportation, created_at, created_by) VALUES(:project_id, :name, :day, :night, :hours, :cost_day, :cost_hour, :food, :transportation, :created_at, :created_by)";
         $stmt = $con->prepare($sql);
 
-        if (empty($data->project_id) || empty($data->name) || !isset($data->day) || !isset($data->cost_day) || !isset($data->food) || !isset($data->transportation)) {
+        if (empty($data->project_id) || empty($data->name) || !isset($data->day) || !isset($data->cost_day) || !isset($data->cost_hour) || !isset($data->food) || !isset($data->transportation)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'All fields are required.']);
             exit();
@@ -48,6 +48,7 @@ switch ($method) {
         $stmt->bindParam(':night', $data->night);
         $stmt->bindParam(':hours', $data->hours);
         $stmt->bindParam(':cost_day', $data->cost_day);
+        $stmt->bindParam(':cost_hour', $data->cost_hour);
         $stmt->bindParam(':food', $data->food);
         $stmt->bindParam(':transportation', $data->transportation);
         $stmt->bindParam(':created_at', $data->created_at);
@@ -67,6 +68,7 @@ switch ($method) {
                     'night' => $data->night,
                     'hours' => $data->hours,
                     'cost_day' => $data->cost_day,
+                    'cost_hour' => $data->cost_hour,
                     'food' => $data->food,
                     'transportation' => $data->transportation,
                     'created_at' => $data->created_at,
@@ -85,10 +87,10 @@ switch ($method) {
 
     case "PUT":
         $data = json_decode(file_get_contents('php://input'));
-        $sql = "UPDATE project_workers SET name =:name, day =:day, night =:night, hours =:hours, cost_day =:cost_day, food =:food, transportation =:transportation WHERE id = :id";
+        $sql = "UPDATE project_workers SET name =:name, day =:day, night =:night, hours =:hours, cost_day =:cost_day, cost_hour =:cost_hour, food =:food, transportation =:transportation WHERE id = :id";
         $stmt = $con->prepare($sql);
 
-        if (empty($data->project_id) || empty($data->name) || !isset($data->day) || !isset($data->cost_day) || !isset($data->food) || !isset($data->transportation)) {
+        if (empty($data->project_id) || empty($data->name) || !isset($data->day) || !isset($data->cost_day) || !isset($data->cost_hour) || !isset($data->food) || !isset($data->transportation)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'All fields are required.']);
             exit();
@@ -105,6 +107,7 @@ switch ($method) {
         $stmt->bindParam(':night', $data->night);
         $stmt->bindParam(':hours', $data->hours);
         $stmt->bindParam(':cost_day', $data->cost_day);
+        $stmt->bindParam(':cost_hour', $data->cost_hour);
         $stmt->bindParam(':food', $data->food);
         $stmt->bindParam(':transportation', $data->transportation);
         $stmt->bindParam(':id', $data->worker_id);
