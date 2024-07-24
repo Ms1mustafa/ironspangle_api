@@ -22,10 +22,10 @@ switch ($method) {
         // can get all or filtered sd
         $sql = "SELECT * FROM sd_workers";
         $path = explode('/', $_SERVER['REQUEST_URI']);
-        if (isset($_GET['sdId']) && is_numeric($_GET['sdId'])) {
-            $sql .= " WHERE id = :sdId";
+        if (isset($_GET['workerId']) && is_numeric($_GET['workerId'])) {
+            $sql .= " WHERE id = :workerId";
             $stmt = $con->prepare($sql);
-            $stmt->bindParam(':workerId', $_GET['sdId']);
+            $stmt->bindParam(':workerId', $_GET['workerId']);
             $stmt->execute();
             if ($sd = $stmt->fetch(PDO::FETCH_ASSOC)) {
                 http_response_code(200);

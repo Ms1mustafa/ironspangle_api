@@ -83,15 +83,15 @@ switch ($method) {
         $sql = "UPDATE sd_workers SET name =:name, days =:days, day_cost =:day_cost, transportation =:transportation, day_salary =:day_salary WHERE id = :id";
         $stmt = $con->prepare($sql);
 
-        if (empty($data->project_id) || empty($data->name) || !isset($data->day) || !isset($data->cost_day) || !isset($data->cost_hour) || !isset($data->food) || !isset($data->transportation)) {
+        if (empty($data->name) || !isset($data->days) || !isset($data->day_cost) || !isset($data->transportation) || !isset($data->day_salary)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'All fields are required.']);
             exit();
         }
         //check if numeric
-        if (!is_numeric($data->day) || !is_numeric($data->night ?? 0) || !is_numeric($data->hours ?? 0) || !is_numeric($data->cost_day) || !is_numeric($data->food) || !is_numeric($data->transportation)) {
+        if (!is_numeric($data->days) || !is_numeric($data->day_cost) || !is_numeric($data->transportation) || !is_numeric($data->transportation) || !is_numeric($data->day_salary)) {
             http_response_code(400);
-            echo json_encode(['status' => 400, 'message' => 'day, night, hours, cost_day, food, transportation must be numeric.']);
+            echo json_encode(['status' => 400, 'message' => 'days, day_cost, transportation, day_salary must be numeric.']);
             exit();
         }
 
@@ -100,7 +100,7 @@ switch ($method) {
         $stmt->bindParam(':day_cost', $data->day_cost);
         $stmt->bindParam(':transportation', $data->transportation);
         $stmt->bindParam(':day_salary', $data->day_salary);
-        $stmt->bindParam(':id', $data->sd_id);
+        $stmt->bindParam(':id', $data->worker_id);
         if ($stmt->execute()) {
             http_response_code(200);
             echo json_encode(['status' => 200, 'message' => 'Worker updated successfully.']);
