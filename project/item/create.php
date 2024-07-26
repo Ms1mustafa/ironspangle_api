@@ -22,7 +22,7 @@ switch ($method) {
         $sql = "INSERT INTO project_items (project_id, name, unit, qty, unit_price, trans, date, remarks, created_at, created_by) VALUES(:project_id, :name, :unit, :qty, :unit_price, :trans, :date, :remarks, :created_at, :created_by)";
         $stmt = $con->prepare($sql);
 
-        if (empty($data->project_id) || empty($data->name) || empty($data->unit) || !isset($data->qty) || !isset($data->unit_price) || !isset($data->trans) || empty($data->date)) {
+        if (empty($data->project_id) || empty($data->name) || empty($data->unit) || !isset($data->qty) || !isset($data->unit_price) || !isset($data->trans)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'All fields are required.']);
             exit();
@@ -88,7 +88,7 @@ switch ($method) {
         $sql = "UPDATE project_items SET name =:name, unit =:unit, qty =:qty, unit_price =:unit_price, trans =:trans, date =:date, remarks =:remarks WHERE id = :id";
         $stmt = $con->prepare($sql);
 
-        if (empty($data->project_id) || empty($data->name) || empty($data->unit) || !isset($data->qty) || !isset($data->unit_price) || !isset($data->trans) || empty($data->date)) {
+        if (empty($data->project_id) || empty($data->name) || empty($data->unit) || !isset($data->qty) || !isset($data->unit_price) || !isset($data->trans)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'All fields are required.']);
             exit();

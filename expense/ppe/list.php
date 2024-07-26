@@ -37,6 +37,17 @@ switch ($method) {
                 exit();
             }
         } else {
+            if (isset($_GET['date']) && !empty($_GET['date'])) {
+                $sql .= " WHERE date = :date";
+                $stmt = $con->prepare($sql);
+                $stmt->bindParam(':date', $_GET['date']);
+                $stmt->execute();
+                $expenses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                http_response_code(200);
+                echo json_encode($expenses);
+                exit();
+            }
+            $sql .= " WHERE date = DATE_FORMAT(CURDATE(), '%Y-%m');";
             $stmt = $con->prepare($sql);
             $stmt->execute();
             $expenses = $stmt->fetchAll(PDO::FETCH_ASSOC);
