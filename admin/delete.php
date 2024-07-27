@@ -32,17 +32,8 @@ switch ($method) {
         try {
             $con->beginTransaction();
 
-            $sqlItems = "DELETE FROM project_items WHERE project_id = :id";
-            $stmtItems = $con->prepare($sqlItems);
-            $stmtItems->bindParam(':id', $data->id);
-
-            // Execute the statement
-            if (!$stmtItems->execute()) {
-                throw new Exception('Failed to delete associated Items.');
-            }
-
             // Prepare SQL statement to delete associated workers
-            $sqlWorkers = "DELETE FROM project_workers WHERE project_id = :id";
+            $sqlWorkers = "DELETE FROM admin_workers WHERE admin_id = :id";
             $stmtWorkers = $con->prepare($sqlWorkers);
             $stmtWorkers->bindParam(':id', $data->id);
 
@@ -52,20 +43,20 @@ switch ($method) {
             }
 
             // Prepare SQL statement to delete the project
-            $sqlProject = "DELETE FROM projects WHERE id = :id";
+            $sqlProject = "DELETE FROM admin WHERE id = :id";
             $stmtProject = $con->prepare($sqlProject);
             $stmtProject->bindParam(':id', $data->id);
 
             // Execute the statement
             if (!$stmtProject->execute()) {
-                throw new Exception('Failed to delete project.');
+                throw new Exception('Failed to delete Admin.');
             }
 
             // Commit transaction
             $con->commit();
 
             http_response_code(200);
-            echo json_encode(['status' => 200, 'message' => 'Project and associated items, workers deleted successfully.']);
+            echo json_encode(['status' => 200, 'message' => 'Admin and associated workers deleted successfully.']);
         } catch (Exception $e) {
             // Rollback transaction if something failed
             $con->rollBack();
