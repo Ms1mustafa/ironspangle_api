@@ -22,7 +22,7 @@ switch ($method) {
         $sql = "INSERT INTO lafarge(item, cost, date, remark, created_at, created_by) VALUES(:item, :cost, :date, :remark, :created_at, :created_by)";
         $stmt = $con->prepare($sql);
 
-        if (!$data || empty($data->item) || empty($data->cost) || empty($data->date) || empty($data->remark)) {
+        if (!$data || empty($data->item) || empty($data->cost) || empty($data->date)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'All fields are required.']);
             exit();
@@ -77,7 +77,7 @@ switch ($method) {
         $sql = "UPDATE lafarge SET item = :item, cost = :cost, date = :date, remark = :remark WHERE id = :id";
         $stmt = $con->prepare($sql);
 
-        if (!$data || empty($data->item) || empty($data->cost) || empty($data->date) || empty($data->remark)) {
+        if (!$data || empty($data->item) || empty($data->cost) || empty($data->date)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'All fields are required.']);
             exit();
