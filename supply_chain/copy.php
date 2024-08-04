@@ -26,46 +26,44 @@ if ($method !== 'POST') {
 // Decode the JSON input
 $data = json_decode(file_get_contents("php://input"), true);
 
-if (!isset($data['mec_id'])) {
+if (!isset($data['supply_chain_id'])) {
     http_response_code(400);
-    echo json_encode(['status' => 400, 'message' => 'Invalid MEC ID.']);
+    echo json_encode(['status' => 400, 'message' => 'Invalid Supply Chain ID.']);
     exit();
 }
 
-// Optional fields for new mec values
-$newFixed_invoice_cost = isset($data['fixed_invoice_cost']) ? $data['fixed_invoice_cost'] : null;
+// Optional fields for new supply_chain values
 $newPo = isset($data['po']) ? $data['po'] : null;
 $newPr = isset($data['pr']) ? $data['pr'] : null;
 $newDate = isset($data['date']) ? $data['date'] : null;
 
-$mecId = intval($data['mec_id']);
+$SHId = intval($data['supply_chain_id']);
 
 try {
     $con->beginTransaction();
 
-    // Fetch the existing mec
-    $stmt = $con->prepare("SELECT fixed_invoice_cost, po, pr, date FROM mec WHERE id = :id");
-    $stmt->bindParam(':id', $mecId);
+    // Fetch the existing supply_chain
+    $stmt = $con->prepare("SELECT po, pr, date FROM supply_chain WHERE id = :id");
+    $stmt->bindParam(':id', $SHId);
     $stmt->execute();
-    $mec = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$mec) {
+    $supply_chain = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$supply_chain) {
         $con->rollBack();
         http_response_code(404);
-        echo json_encode(['status' => 404, 'message' => 'MEC not found.']);
+        echo json_encode(['status' => 404, 'message' => 'Supply Chain not found.']);
         exit();
     }
 
 
 
     // Use provided new values or fallback to existing values
-    $newFixed_invoice_cost = $newFixed_invoice_cost !== null ? $newFixed_invoice_cost : $mec['fixed_invoice_cost'];
-    $newPo = $newPo !== null ? $newPo : $mec['po'];
-    $newPr = $newPr !== null ? $newPr : $mec['pr'];
-    $newDate = $newDate !== null ? $newDate : $mec['date'];
+    $newPo = $newPo !== null ? $newPo : $supply_chain['po'];
+    $newPr = $newPr !== null ? $newPr : $supply_chain['pr'];
+    $newDate = $newDate !== null ? $newDate : $supply_chain['date'];
 
     // Check if the new date already exists
     if ($newDate) {
-        $stmt = $con->prepare("SELECT COUNT(*) FROM mec WHERE date = :date");
+        $stmt = $con->prepare("SELECT COUNT(*) FROM supply_chain WHERE date = :date");
         $stmt->bindParam(':date', $newDate);
         $stmt->execute();
         $dateExists = $stmt->fetchColumn() > 0;
@@ -73,15 +71,14 @@ try {
         if ($dateExists) {
             $con->rollBack();
             http_response_code(400);
-            echo json_encode(['status' => 400, 'message' => 'MEC already exists for this date.']);
+            echo json_encode(['status' => 400, 'message' => 'Supply Chain already exists for this date.']);
             exit();
         }
     }
 
-    // Insert new mec
-    $stmt = $con->prepare("INSERT INTO mec (fixed_invoice_cost, po, pr, date) VALUES ( :fixed_invoice_cost, :po, :pr, :date)");
+    // Insert new supply_chain
+    $stmt = $con->prepare("INSERT INTO supply_chain (po, pr, date) VALUES (:po, :pr, :date)");
 
-    $stmt->bindParam(':fixed_invoice_cost', $newFixed_invoice_cost);
     $stmt->bindParam(':po', $newPo);
     $stmt->bindParam(':pr', $newPr);
     $stmt->bindParam(':date', $newDate);
@@ -90,35 +87,35 @@ try {
         $con->rollBack();
         $errorInfo = $stmt->errorInfo();
         http_response_code(500);
-        echo json_encode(['status' => 500, 'message' => 'Failed to insert new MEC.', 'error' => $errorInfo]);
+        echo json_encode(['status' => 500, 'message' => 'Failed to insert new Supply Chain.', 'error' => $errorInfo]);
         exit();
     }
 
-    $newMecId = $con->lastInsertId();
+    $newSHId = $con->lastInsertId();
 
-    // Fetch workers for the old mec
-    $stmt = $con->prepare("SELECT * FROM mec_workers WHERE mec_id = :id");
-    $stmt->bindParam(':id', $mecId);
+    // Fetch workers for the old supply_chain
+    $stmt = $con->prepare("SELECT * FROM supply_chain_workers WHERE supply_chain_id = :id");
+    $stmt->bindParam(':id', $SHId);
     $stmt->execute();
     $workers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Insert workers for the new mec
+    // Insert workers for the new supply_chain
     $stmt = $con->prepare("
-        INSERT INTO mec_workers (
-            mec_id, name, status, contract_days, active_days, contract_salary, labor_salary, insurance, ppe, transport, created_at, created_by) 
+        INSERT INTO supply_chain_workers (
+            supply_chain_id, name, job, active_days, contract_salary, labor_salary, insurance, insurance2, ppe, transport, created_at, created_by) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
 
     foreach ($workers as $worker) {
         $stmt->execute([
-            $newMecId,
+            $newSHId,
             $worker['name'],
-            $worker['status'],
-            $worker['contract_days'],
+            $worker['job'],
             $worker['active_days'],
             $worker['contract_salary'],
             $worker['labor_salary'],
             $worker['insurance'],
+            $worker['insurance2'],
             $worker['ppe'],
             $worker['transport'],
             $worker['created_at'],
@@ -130,9 +127,9 @@ try {
 
     echo json_encode([
         'status' => 200,
-        'message' => 'MEC and associated workers copied successfully.',
-        'new_mec' => [
-            'id' => $newMecId,
+        'message' => 'Supply Chain and associated workers copied successfully.',
+        'new_supply_chain' => [
+            'id' => $newSHId,
             'fixed_invoice_cost' => $newFixed_invoice_cost,
             'po' => $newPo,
             'pr' => $newPr,
@@ -144,5 +141,5 @@ try {
 } catch (Exception $e) {
     $con->rollBack();
     http_response_code(500);
-    echo json_encode(['status' => 500, 'message' => 'Error copying MEC and associated workers: ' . $e->getMessage()]);
+    echo json_encode(['status' => 500, 'message' => 'Error copying Supply Chain and associated workers: ' . $e->getMessage()]);
 }
