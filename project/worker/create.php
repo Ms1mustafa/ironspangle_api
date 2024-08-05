@@ -29,9 +29,9 @@ switch ($method) {
         }
         //check if numeric
         //day, night, hours, cost_day, food, transportation
-        if (!is_numeric($data->day) || !is_numeric($data->night ?? 0) || !is_numeric($data->hours ?? 0) || !is_numeric($data->cost_day) || !is_numeric($data->food) || !is_numeric($data->transportation)) {
+        if (!is_numeric($data->day) || !is_numeric($data->cost_day) || !is_numeric($data->food) || !is_numeric($data->transportation)) {
             http_response_code(400);
-            echo json_encode(['status' => 400, 'message' => 'day, night, hours, cost_day, food, transportation must be numeric.']);
+            echo json_encode(['status' => 400, 'message' => 'day, cost_day, food, transportation must be numeric.']);
             exit();
         }
         if (empty($data->created_by)) {

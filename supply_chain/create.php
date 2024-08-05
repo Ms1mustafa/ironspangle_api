@@ -14,7 +14,6 @@ $method = $_SERVER['REQUEST_METHOD'];
 function validateSHData($data)
 {
     return isset($data->po, $data->pr, $data->date) &&
-        is_numeric($data->po) &&
         is_numeric($data->pr) &&
         !empty($data->date);
 }
