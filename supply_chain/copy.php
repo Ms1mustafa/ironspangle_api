@@ -130,7 +130,6 @@ try {
         'message' => 'Supply Chain and associated workers copied successfully.',
         'new_supply_chain' => [
             'id' => $newSHId,
-            'fixed_invoice_cost' => $newFixed_invoice_cost,
             'po' => $newPo,
             'pr' => $newPr,
             'date' => $newDate,

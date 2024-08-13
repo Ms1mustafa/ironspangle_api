@@ -21,50 +21,71 @@ switch ($method) {
         exit();
 
     case "GET":
-        // Handle GET request to fetch project costs
-
-        // Validate and sanitize mec_id input (assuming it's passed as a query parameter)
-        $mec_id = isset($_GET['mec_id']) ? intval($_GET['mec_id']) : null;
-
-        if (!$mec_id) {
-            // Handle case where mec_id is not provided or invalid
-            http_response_code(400);
-            echo json_encode(["error" => "Missing or invalid mec_id parameter"]);
-            exit();
-        }
-
         try {
-            // Query to get total_items_cost from project_items
-            $sql_workers = "SELECT SUM(contract_days * contract_salary) AS total_contract_salary,
-                          SUM((labor_salary * active_days)) AS total_labor_salary,
-                          SUM(transport * active_days) AS transportation,
-                          SUM(insurance) AS insurance,
-                          SUM(COALESCE(ppe)) AS ppe,
-                          SUM(active_days) AS working_days
-                          FROM mec_workers
-                          WHERE mec_id = :mec_id";
+            // Get parameters from the request
+            $mec_id = isset($_GET['mec_id']) ? $_GET['mec_id'] : null;
+            $year = isset($_GET['year']) ? $_GET['year'] : null; // Null if not provided
 
+            // Base SQL query
+            $sql_workers = "SELECT 
+                                SUM(contract_days * contract_salary) AS total_contract_salary,
+                                SUM((labor_salary * active_days)) AS total_labor_salary,
+                                SUM(transport * active_days) AS transportation,
+                                SUM(insurance) AS insurance,
+                                SUM(COALESCE(ppe, 0)) AS ppe,
+                                SUM(active_days) AS working_days,
+                                a.fixed_invoice_cost AS fixed_invoice_cost";
+
+            if ($mec_id !== null) {
+                // Filter for a specific mec_id
+                $sql_workers .= " FROM mec_workers
+                                  WHERE mec_id = :mec_id";
+            } else {
+                // Join with the mec table for monthly aggregation
+                $sql_workers .= ", a.date AS month
+                                  FROM mec_workers AS mw
+                                  JOIN mec AS a ON mw.mec_id = a.id";
+                $sql_workers .= " GROUP BY a.date";
+
+                if ($year !== null) {
+                    // Filter by year if provided
+                    $sql_workers .= " HAVING LEFT(a.date, 4) = :year";
+                }
+            }
+
+            // Prepare and execute the SQL statement
             $stmt_workers = $con->prepare($sql_workers);
-            $stmt_workers->execute([':mec_id' => $mec_id]);
-            $result = $stmt_workers->fetch(PDO::FETCH_ASSOC);
+            $params = [];
 
-            $total_contract_salary = $result['total_contract_salary'];
-            $total_labor_salary = $result['total_labor_salary'];
-            $transportation = $result['transportation'];
-            $insurance = $result['insurance'];
-            $ppe = $result['ppe'];
-            $working_days = $result['working_days'];
+            if ($mec_id !== null) {
+                $params[':mec_id'] = $mec_id;
+            } else if ($year !== null) {
+                $params[':year'] = $year;
+            }
+
+            $stmt_workers->execute($params);
+            $result = $stmt_workers->fetchAll(PDO::FETCH_ASSOC);
 
             // Prepare response
-            $response = [
-                "mec_id" => $mec_id,
-                'total_contract_salary' => $total_contract_salary,
-                'total_labor_salary' => $total_labor_salary,
-                'transportation' => $transportation,
-                'insurance' => $insurance,
-                'ppe' => $ppe,
-                'working_days' => $working_days,
-            ];
+            if ($mec_id !== null) {
+                // Single mec_id response
+                $response = $result[0]; // Assuming single result
+            } else {
+                // Aggregate totals for each month response
+                $response = [];
+                foreach ($result as $row) {
+                    $response[] = [
+                        "month" => isset($row['month']) ? $row['month'] : null,
+                        "total_contract_salary" => $row['total_contract_salary'] ?? 0,
+                        "total_labor_salary" => $row['total_labor_salary'] ?? 0,
+                        "transportation" => $row['transportation'] ?? 0,
+                        "insurance" => $row['insurance'] ?? 0,
+                        "ppe" => $row['ppe'] ?? 0,
+                        "working_days" => $row['working_days'] ?? 0,
+                        "fixed_invoice_cost" => $row['fixed_invoice_cost'] ?? 0
+                    ];
+                }
+            }
 
             // Return JSON response
             http_response_code(200);

@@ -21,50 +21,69 @@ switch ($method) {
         exit();
 
     case "GET":
-        // Handle GET request to fetch project costs
-
-        // Validate and sanitize supply_chain_id input (assuming it's passed as a query parameter)
-        $supply_chain_id = isset($_GET['supply_chain_id']) ? intval($_GET['supply_chain_id']) : null;
-
-        if (!$supply_chain_id) {
-            // Handle case where supply_chain_id is not provided or invalid
-            http_response_code(400);
-            echo json_encode(["error" => "Missing or invalid supply_chain_id parameter"]);
-            exit();
-        }
-
         try {
-            // Query to get total_items_cost from project_items
-            $sql_workers = "SELECT SUM(active_days * contract_salary) AS total_contract_salary,
-                          SUM((labor_salary * active_days) - COALESCE(insurance2, 0)) AS total_labor_salary,
-                          SUM(transport * active_days) AS transportation,
-                          SUM(insurance) AS insurance,
-                          SUM(COALESCE(ppe)) AS ppe,
-                          SUM(active_days) AS working_days
-                          FROM supply_chain_workers
-                          WHERE supply_chain_id = :supply_chain_id";
+            // Get parameters from the request
+            $supply_chain_id = isset($_GET['supply_chain_id']) ? $_GET['supply_chain_id'] : null;
+            $year = isset($_GET['year']) ? $_GET['year'] : null; // Null if not provided
 
+            // Base SQL query
+            $sql_workers = "SELECT 
+                                SUM(active_days * contract_salary) AS total_contract_salary,
+                                SUM((labor_salary * active_days) - COALESCE(insurance2, 0)) AS total_labor_salary,
+                                SUM(transport * active_days) AS transportation,
+                                SUM(insurance) AS insurance,
+                                SUM(COALESCE(ppe, 0)) AS ppe,
+                                SUM(active_days) AS working_days";
+
+            if ($supply_chain_id !== null) {
+                // Filter for a specific supply_chain_id
+                $sql_workers .= " FROM supply_chain_workers
+                                  WHERE supply_chain_id = :supply_chain_id";
+            } else {
+                // Join with the supply_chain table for monthly aggregation
+                $sql_workers .= ", a.date AS month
+                                  FROM supply_chain_workers AS scw
+                                  JOIN supply_chain AS a ON scw.supply_chain_id = a.id";
+                $sql_workers .= " GROUP BY a.date";
+
+                if ($year !== null) {
+                    // Filter by year if provided
+                    $sql_workers .= " HAVING LEFT(a.date, 4) = :year";
+                }
+            }
+
+            // Prepare and execute the SQL statement
             $stmt_workers = $con->prepare($sql_workers);
-            $stmt_workers->execute([':supply_chain_id' => $supply_chain_id]);
-            $result = $stmt_workers->fetch(PDO::FETCH_ASSOC);
+            $params = [];
 
-            $total_contract_salary = $result['total_contract_salary'];
-            $total_labor_salary = $result['total_labor_salary'];
-            $transportation = $result['transportation'];
-            $insurance = $result['insurance'];
-            $ppe = $result['ppe'];
-            $working_days = $result['working_days'];
+            if ($supply_chain_id !== null) {
+                $params[':supply_chain_id'] = $supply_chain_id;
+            } else if ($year !== null) {
+                $params[':year'] = $year;
+            }
+
+            $stmt_workers->execute($params);
+            $result = $stmt_workers->fetchAll(PDO::FETCH_ASSOC);
 
             // Prepare response
-            $response = [
-                "supply_chain_id" => $supply_chain_id,
-                'total_contract_salary' => $total_contract_salary,
-                'total_labor_salary' => $total_labor_salary,
-                'transportation' => $transportation,
-                'insurance' => $insurance,
-                'ppe' => $ppe,
-                'working_days' => $working_days,
-            ];
+            if ($supply_chain_id !== null) {
+                // Single supply_chain_id response
+                $response = $result[0]; // Assuming single result
+            } else {
+                // Aggregate totals for each month response
+                $response = [];
+                foreach ($result as $row) {
+                    $response[] = [
+                        "month" => isset($row['month']) ? $row['month'] : null,
+                        "total_contract_salary" => $row['total_contract_salary'] ?? 0,
+                        "total_labor_salary" => $row['total_labor_salary'] ?? 0,
+                        "transportation" => $row['transportation'] ?? 0,
+                        "insurance" => $row['insurance'] ?? 0,
+                        "ppe" => $row['ppe'] ?? 0,
+                        "working_days" => $row['working_days'] ?? 0
+                    ];
+                }
+            }
 
             // Return JSON response
             http_response_code(200);
