@@ -40,9 +40,11 @@ switch ($method) {
         }
 
         // Proceed with the insertion
-        $sql = "INSERT INTO swift (swift) VALUES (:swift)";
+        $sql = "INSERT INTO swift (swift, date, receive_at_bank) VALUES (:swift, :date, :receive_at_bank)";
         $stmt = $con->prepare($sql);
         $stmt->bindParam(':swift', $data->swift);
+        $stmt->bindParam(':date', $data->date);
+        $stmt->bindParam(':receive_at_bank', $data->receive_at_bank);
 
         if ($stmt->execute()) {
             $lastInsertId = $con->lastInsertId();
@@ -52,6 +54,8 @@ switch ($method) {
                 'swift' => [
                     'id' => $lastInsertId,
                     'swift' => $data->swift,
+                    'date' => $data->date,
+                    'receive_at_bank' => $data->receive_at_bank
                 ]
             ];
             http_response_code(200);
@@ -65,7 +69,7 @@ switch ($method) {
 
     case "PUT":
         $data = json_decode(file_get_contents('php://input'));
-        $sql = "UPDATE swift SET swift = :swift WHERE id = :id";
+        $sql = "UPDATE swift SET swift = :swift, date = :date, receive_at_bank = :receive_at_bank WHERE id = :id";
         $stmt = $con->prepare($sql);
 
         if (!$data || empty($data->swift) || empty($data->id)) {
@@ -77,6 +81,7 @@ switch ($method) {
         // Check if the swift value already exists (excluding the current record)
         $checkSql = "SELECT COUNT(*) FROM swift WHERE swift = :swift AND id != :id";
         $checkStmt = $con->prepare($checkSql);
+
         $checkStmt->bindParam(':swift', $data->swift);
         $checkStmt->bindParam(':id', $data->id);
         $checkStmt->execute();
@@ -90,6 +95,8 @@ switch ($method) {
 
         // Bind parameters and execute the update statement
         $stmt->bindParam(':swift', $data->swift);
+        $stmt->bindParam(':date', $data->date);
+        $stmt->bindParam(':receive_at_bank', $data->receive_at_bank);
         $stmt->bindParam(':id', $data->id);
 
         if ($stmt->execute()) {
