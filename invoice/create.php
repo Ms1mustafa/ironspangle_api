@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: *");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
+header("Access-Control-Allow-Methods: POST, PUT, OPTIONS");
 header("Access-Control-Allow-Credentials: true");
 
 include '../includes/config.php';
@@ -79,9 +79,9 @@ switch ($method) {
 
         if ($stmt->execute()) {
             $lastInsertId = $con->lastInsertId();
-            http_response_code(201);
+            http_response_code(200);
             echo json_encode([
-                'status' => 201,
+                'status' => 200,
                 'message' => 'Invoice created successfully.',
                 'invoice' => ['id' => $lastInsertId, 'invoice_no' => $data->invoice_no]
             ]);
@@ -116,7 +116,6 @@ switch ($method) {
 
         // Update invoice
         $sql = "UPDATE invoice SET
-                swift_id = :swift_id,
                 description = :description,
                 pr_no = :pr_no,
                 pr_date = :pr_date,
@@ -141,7 +140,6 @@ switch ($method) {
         $stmt = $con->prepare($sql);
 
         // Bind parameters, set optional parameters to null if not provided
-        $stmt->bindParam(':swift_id', $data->swift_id);
         $stmt->bindParam(':description', $data->description);
         $stmt->bindParam(':pr_no', $data->pr_no);
         $stmt->bindParam(':pr_date', $data->pr_date);

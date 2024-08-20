@@ -25,31 +25,40 @@ switch ($method) {
             // Retrieve a single invoice by ID
             $sql = "SELECT * FROM invoice WHERE id = :id";
             $stmt = $con->prepare($sql);
-            $stmt->bindParam(':id', $id);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            $record = $stmt->fetch(PDO::FETCH_ASSOC); // Fetch a single record
+
+            if ($record) {
+                http_response_code(200);
+                echo json_encode($record);
+            } else {
+                http_response_code(404);
+                echo json_encode(['status' => 404, 'message' => 'Record not found']);
+            }
         } elseif ($swift_id) {
             // Retrieve invoices based on swift_id
             $sql = "SELECT * FROM invoice WHERE swift_id = :swift_id";
             $stmt = $con->prepare($sql);
-            $stmt->bindParam(':swift_id', $swift_id);
+            $stmt->bindParam(':swift_id', $swift_id, PDO::PARAM_INT);
+            $stmt->execute();
+            $records = $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch all records
+
+            if ($records) {
+                http_response_code(200);
+                echo json_encode($records);
+            }
         } else {
             // Retrieve all invoices
             $sql = "SELECT * FROM invoice";
             $stmt = $con->prepare($sql);
-        }
+            $stmt->execute();
+            $records = $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch all records
 
-        $stmt->execute();
-        $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        if ($records) {
-            http_response_code(200);
-            echo json_encode([
-                'status' => 200,
-                'message' => 'Records retrieved successfully.',
-                'data' => $records
-            ]);
-        } else {
-            http_response_code(404);
-            echo json_encode(['status' => 404, 'message' => 'No records found.']);
+            if ($records) {
+                http_response_code(200);
+                echo json_encode($records);
+            }
         }
         break;
 
