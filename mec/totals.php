@@ -28,23 +28,22 @@ switch ($method) {
 
             // Base SQL query
             $sql_workers = "SELECT 
-                                SUM(contract_days * contract_salary) AS total_contract_salary,
-                                SUM((labor_salary * active_days)) AS total_labor_salary,
-                                SUM(transport * active_days) AS transportation,
-                                SUM(insurance) AS insurance,
-                                SUM(COALESCE(ppe, 0)) AS ppe,
-                                SUM(active_days) AS working_days,
-                                a.fixed_invoice_cost AS fixed_invoice_cost";
+                    SUM(contract_days * contract_salary) AS total_contract_salary,
+                    SUM((labor_salary * active_days)) AS total_labor_salary,
+                    SUM(transport * active_days) AS transportation,
+                    SUM(insurance) AS insurance,
+                    SUM(COALESCE(ppe, 0)) AS ppe,
+                    SUM(active_days) AS working_days";
 
             if ($mec_id !== null) {
                 // Filter for a specific mec_id
                 $sql_workers .= " FROM mec_workers
-                                  WHERE mec_id = :mec_id";
+                      WHERE mec_id = :mec_id";
             } else {
                 // Join with the mec table for monthly aggregation
                 $sql_workers .= ", a.date AS month
-                                  FROM mec_workers AS mw
-                                  JOIN mec AS a ON mw.mec_id = a.id";
+                      FROM mec_workers AS mw
+                      JOIN mec AS a ON mw.mec_id = a.id";
                 $sql_workers .= " GROUP BY a.date";
 
                 if ($year !== null) {
