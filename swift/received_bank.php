@@ -44,7 +44,7 @@ switch ($method) {
         // Add filtering by swift_id if provided
         if ($swift_id !== null) {
             // Sanitize the swift_id to prevent SQL injection
-            $swift_id = filter_var($swift_id, FILTER_SANITIZE_STRING);
+            $swift_id = filter_var($swift_id);
             $sql .= " AND s.id = :swift_id";
         }
 
