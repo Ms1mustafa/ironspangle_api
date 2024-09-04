@@ -38,8 +38,13 @@ switch ($method) {
                 swift s ON i.swift_id = s.id
             WHERE
                 (i.guarantee IS NOT NULL AND i.guarantee != 0)
-                AND
-                (i.tax IS NOT NULL AND i.tax != 0)";
+                OR
+                (i.tax IS NOT NULL AND i.tax != 0)
+                OR
+                (i.publish IS NOT NULL AND i.publish != 0)
+                OR
+                (i.fines IS NOT NULL AND i.fines != 0)
+                ";
 
         // Add filtering by swift_id if provided
         if ($swift_id !== null) {
