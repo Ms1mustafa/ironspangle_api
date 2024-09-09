@@ -19,7 +19,8 @@ switch ($method) {
 
     case "GET":
         $data = json_decode(file_get_contents('php://input'));
-        $sql = "SELECT s.*, IFNULL(SUM(i.cost), 0) AS total_invoices_cost 
+        $sql = "SELECT s.*, IFNULL(SUM(i.cost), 0) AS total_invoices_cost
+                , IFNULL(COUNT(i.invoice_no), 0) AS invoices_no
                 FROM swift s
                 LEFT JOIN invoice i ON s.id = i.swift_id
                 GROUP BY s.id";
