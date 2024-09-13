@@ -20,6 +20,7 @@ switch ($method) {
     case "GET":
         $id = isset($_GET['id']) ? (int) $_GET['id'] : null;
         $swift_id = isset($_GET['swift_id']) ? (int) $_GET['swift_id'] : null;
+        $notAssignedToSwift = isset($_GET['not_assigned_to_swift']) ? true : null;
 
         if ($id) {
             // Retrieve a single invoice by ID
@@ -44,6 +45,17 @@ switch ($method) {
             $stmt->execute();
             $records = $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch all records
 
+            if ($records) {
+                http_response_code(200);
+                echo json_encode($records);
+            }
+        } elseif ($notAssignedToSwift) {
+            // Retrieve invoices based on assigned_to_swift
+            $sql = "SELECT * FROM invoice WHERE swift_id IS NULL";
+            $stmt = $con->prepare($sql);
+            // $stmt->bindParam(':not_assigned_to_swift', $notAssignedToSwift, PDO::PARAM_INT);
+            $stmt->execute();
+            $records = $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch all records
             if ($records) {
                 http_response_code(200);
                 echo json_encode($records);

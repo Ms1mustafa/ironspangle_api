@@ -24,6 +24,7 @@ switch ($method) {
         // Base SQL query
         $sql = "SELECT 
             s.swift AS swift,
+            i.id,
             i.invoice_no,
             i.description,
             i.s_no,
@@ -74,6 +75,7 @@ switch ($method) {
                 ];
             }
             $data[$swift]['invoices'][] = [
+                'id' => $row['id'],
                 'invoice_no' => $row['invoice_no'],
                 'description' => $row['description'],
                 's_no' => $row['s_no'],
