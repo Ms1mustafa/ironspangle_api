@@ -49,9 +49,11 @@ if ($method === "GET") {
         $sql = "SELECT s.*, IFNULL(SUM(i.cost), 0) AS total_invoices_cost,
                         IFNULL(COUNT(i.invoice_no), 0) AS invoices_no
                 FROM swift s
-                LEFT JOIN invoice i ON s.id = i.swift_id
+                LEFT JOIN invoice i ON s.id = i.swift_id 
+                WHERE DATE_FORMAT(date, '%Y-%m') = :date
                 GROUP BY s.id";
         $stmt = $con->prepare($sql);
+        $stmt->bindParam(':date', $_GET['date']);
         $stmt->execute();
         $swift = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
