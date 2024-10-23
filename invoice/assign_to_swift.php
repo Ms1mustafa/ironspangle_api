@@ -30,7 +30,7 @@ switch ($method) {
             exit();
         }
         // Check if all required fields are empty
-        if (empty($data->guarantee) && empty($data->tax) && empty($data->publish) && empty($data->fines)) {
+        if (empty($data->guarantee) && empty($data->tax) && empty($data->publish) && empty($data->fines) && empty($data->tax_bint)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'At least one field is required.']);
             exit();
@@ -54,6 +54,7 @@ switch ($method) {
                 swift_id = :swift_id,
                 guarantee = :guarantee,
                 tax = :tax,
+                tax_bint = :tax_bint,
                 publish = :publish,
                 fines = :fines
             WHERE id = :id";
@@ -63,6 +64,7 @@ switch ($method) {
         $stmt->bindParam(':swift_id', $data->swift_id);
         $stmt->bindParam(':guarantee', $data->guarantee);
         $stmt->bindParam(':tax', $data->tax);
+        $stmt->bindParam(':tax_bint', $data->tax_bint);
         $stmt->bindParam(':publish', $data->publish);
         $stmt->bindParam(':fines', $data->fines);
         $stmt->bindParam(':id', $data->id);
