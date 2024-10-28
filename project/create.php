@@ -7,7 +7,7 @@ header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Methods: POST, PUT, OPTIONS");
 header("Access-Control-Allow-Credentials: true");
 
-include ('../includes/config.php');
+include('../includes/config.php');
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -22,13 +22,13 @@ switch ($method) {
         $sql = "INSERT INTO projects(name, body, budget, po, pr, created_at, created_by) VALUES(:name, :body, :budget, :po, :pr, :created_at, :created_by)";
         $stmt = $con->prepare($sql);
 
-        if (!$data || empty($data->name) || !isset($data->budget) || !isset($data->po) || !isset($data->pr)) {
+        if (!$data || empty($data->name) || !isset($data->budget) || !isset($data->po)) {
             http_response_code(400);
-            echo json_encode(['status' => 400, 'message' => 'All fields are required.']);
+            echo json_encode(['status' => 400, 'message' => 'All fields marked with * are required.']);
             exit();
         }
 
-        if (!is_numeric($data->budget) || !is_numeric($data->po) || !is_numeric($data->pr)) {
+        if (!is_numeric($data->budget) || !is_numeric($data->po)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'budget, po, pr must be numeric.']);
             exit();
@@ -78,13 +78,13 @@ switch ($method) {
         $sql = "UPDATE projects SET name= :name, body =:body, budget =:budget, po =:po, pr =:pr WHERE id = :id";
         $stmt = $con->prepare($sql);
 
-        if (!$data || empty($data->name) || !isset($data->budget) || !isset($data->po) || !isset($data->pr)) {
+        if (!$data || empty($data->name) || !isset($data->budget) || !isset($data->po)) {
             http_response_code(400);
-            echo json_encode(['status' => 400, 'message' => 'All fields are required.']);
+            echo json_encode(['status' => 400, 'message' => 'All fields marked with * are required.']);
             exit();
         }
 
-        if (!is_numeric($data->budget) || !is_numeric($data->po) || !is_numeric($data->pr)) {
+        if (!is_numeric($data->budget) || !is_numeric($data->po)) {
             http_response_code(400);
             echo json_encode(['status' => 400, 'message' => 'budget, po, pr must be numeric.']);
             exit();

@@ -46,11 +46,11 @@ switch ($method) {
         $sql = "INSERT INTO invoice (
             swift_id, description, pr_no, pr_date, po_no, po_date, invoice_no,
             invoice_date, invoice_send, invoice_store, invoice_pru, invoice_accounting,
-            s_no, s_date, cost, status, p_and_lc, guarantee, tax, publish, fines
+            s_no, s_date, cost, status, p_and_lc, guarantee, tax, tax_bint, publish, fines
         ) VALUES (
             :swift_id, :description, :pr_no, :pr_date, :po_no, :po_date, :invoice_no,
             :invoice_date, :invoice_send, :invoice_store, :invoice_pru, :invoice_accounting,
-            :s_no, :s_date, :cost, :status, :p_and_lc, :guarantee, :tax, :publish, :fines
+            :s_no, :s_date, :cost, :status, :p_and_lc, :guarantee, :tax, :tax_bint, :publish, :fines
         )";
         $stmt = $con->prepare($sql);
 
@@ -74,6 +74,7 @@ switch ($method) {
         $stmt->bindParam(':p_and_lc', $data->p_and_lc);
         $stmt->bindParam(':guarantee', $data->guarantee);
         $stmt->bindParam(':tax', $data->tax);
+        $stmt->bindParam(':tax_bint', $data->tax_bint);
         $stmt->bindParam(':publish', $data->publish);
         $stmt->bindParam(':fines', $data->fines);
 
@@ -114,8 +115,17 @@ switch ($method) {
             exit();
         }
 
-        // Update invoice
-        $sql = "UPDATE invoice SET
+        if ($data->values_edit) {
+            $sql = "UPDATE invoice SET
+                    guarantee = :guarantee,
+                    tax = :tax,
+                    tax_bint = :tax_bint,
+                    publish = :publish,
+                    fines = :fines
+                WHERE id = :id";
+        } else {
+            // Update invoice
+            $sql = "UPDATE invoice SET
                 description = :description,
                 pr_no = :pr_no,
                 pr_date = :pr_date,
@@ -134,33 +144,45 @@ switch ($method) {
                 p_and_lc = :p_and_lc,
                 guarantee = :guarantee,
                 tax = :tax,
+                tax_bint = :tax_bint,
                 publish = :publish,
                 fines = :fines
             WHERE id = :id";
+        }
         $stmt = $con->prepare($sql);
 
         // Bind parameters, set optional parameters to null if not provided
-        $stmt->bindParam(':description', $data->description);
-        $stmt->bindParam(':pr_no', $data->pr_no);
-        $stmt->bindParam(':pr_date', $data->pr_date);
-        $stmt->bindParam(':po_no', $data->po_no);
-        $stmt->bindParam(':po_date', $data->po_date);
-        $stmt->bindParam(':invoice_no', $data->invoice_no);
-        $stmt->bindParam(':invoice_date', $data->invoice_date);
-        $stmt->bindParam(':invoice_send', $data->invoice_send);
-        $stmt->bindParam(':invoice_store', $data->invoice_store);
-        $stmt->bindParam(':invoice_pru', $data->invoice_pru);
-        $stmt->bindParam(':invoice_accounting', $data->invoice_accounting);
-        $stmt->bindParam(':s_no', $data->s_no);
-        $stmt->bindParam(':s_date', $data->s_date);
-        $stmt->bindParam(':cost', $data->cost);
-        $stmt->bindParam(':status', $data->status);
-        $stmt->bindParam(':p_and_lc', $data->p_and_lc);
-        $stmt->bindParam(':guarantee', $data->guarantee);
-        $stmt->bindParam(':tax', $data->tax);
-        $stmt->bindParam(':publish', $data->publish);
-        $stmt->bindParam(':fines', $data->fines);
-        $stmt->bindParam(':id', $data->id);
+        if ($data->values_edit) {
+            $stmt->bindParam(':guarantee', $data->guarantee);
+            $stmt->bindParam(':tax', $data->tax);
+            $stmt->bindParam(':tax_bint', $data->tax_bint);
+            $stmt->bindParam(':publish', $data->publish);
+            $stmt->bindParam(':fines', $data->fines);
+            $stmt->bindParam(':id', $data->id);
+        } else {
+            $stmt->bindParam(':description', $data->description);
+            $stmt->bindParam(':pr_no', $data->pr_no);
+            $stmt->bindParam(':pr_date', $data->pr_date);
+            $stmt->bindParam(':po_no', $data->po_no);
+            $stmt->bindParam(':po_date', $data->po_date);
+            $stmt->bindParam(':invoice_no', $data->invoice_no);
+            $stmt->bindParam(':invoice_date', $data->invoice_date);
+            $stmt->bindParam(':invoice_send', $data->invoice_send);
+            $stmt->bindParam(':invoice_store', $data->invoice_store);
+            $stmt->bindParam(':invoice_pru', $data->invoice_pru);
+            $stmt->bindParam(':invoice_accounting', $data->invoice_accounting);
+            $stmt->bindParam(':s_no', $data->s_no);
+            $stmt->bindParam(':s_date', $data->s_date);
+            $stmt->bindParam(':cost', $data->cost);
+            $stmt->bindParam(':status', $data->status);
+            $stmt->bindParam(':p_and_lc', $data->p_and_lc);
+            $stmt->bindParam(':guarantee', $data->guarantee);
+            $stmt->bindParam(':tax', $data->tax);
+            $stmt->bindParam(':tax_bint', $data->tax_bint);
+            $stmt->bindParam(':publish', $data->publish);
+            $stmt->bindParam(':fines', $data->fines);
+            $stmt->bindParam(':id', $data->id);
+        }
 
         if ($stmt->execute()) {
             http_response_code(200);
