@@ -32,14 +32,14 @@ switch ($method) {
         try {
             $con->beginTransaction();
 
-            // Prepare SQL statement to delete associated workers
-            $sqlInvoice = "DELETE FROM invoice WHERE swift_id = :id";
+            // Prepare SQL statement to remove swift_id from associated invoices
+            $sqlInvoice = "UPDATE invoice SET swift_id = NULL WHERE swift_id = :id";
             $stmtInvoice = $con->prepare($sqlInvoice);
             $stmtInvoice->bindParam(':id', $data->id);
 
             // Execute the statement
             if (!$stmtInvoice->execute()) {
-                throw new Exception('Failed to delete associated invoices.');
+                throw new Exception('Failed to update associated invoices.');
             }
 
             // Prepare SQL statement to delete the project
@@ -56,7 +56,7 @@ switch ($method) {
             $con->commit();
 
             http_response_code(200);
-            echo json_encode(['status' => 200, 'message' => 'Swift and associated invoices deleted successfully.']);
+            echo json_encode(['status' => 200, 'message' => 'Swift deleted and associated invoices updated successfully.']);
         } catch (Exception $e) {
             // Rollback transaction if something failed
             $con->rollBack();

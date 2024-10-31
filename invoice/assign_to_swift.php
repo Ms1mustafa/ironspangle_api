@@ -30,11 +30,11 @@ switch ($method) {
             exit();
         }
         // Check if all required fields are empty
-        if (empty($data->guarantee) && empty($data->tax) && empty($data->publish) && empty($data->fines) && empty($data->tax_bint)) {
-            http_response_code(400);
-            echo json_encode(['status' => 400, 'message' => 'At least one field is required.']);
-            exit();
-        }
+        // if (empty($data->guarantee) && empty($data->tax) && empty($data->publish) && empty($data->fines) && empty($data->tax_bint)) {
+        //     http_response_code(400);
+        //     echo json_encode(['status' => 400, 'message' => 'At least one field is required.']);
+        //     exit();
+        // }
 
         // Check if the swift already exists
         $checkSql = "SELECT COUNT(*) FROM swift WHERE id = :swift_id";

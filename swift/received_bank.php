@@ -32,19 +32,20 @@ switch ($method) {
             i.guarantee,
             i.tax,
             i.publish,
-            i.fines
+            i.fines,
+            i.tax_bint
             FROM 
                 invoice i
             JOIN 
                 swift s ON i.swift_id = s.id
-            WHERE
-                ((i.guarantee IS NOT NULL AND i.guarantee != 0)
-                OR
-                (i.tax IS NOT NULL AND i.tax != 0)
-                OR
-                (i.publish IS NOT NULL AND i.publish != 0)
-                OR
-                (i.fines IS NOT NULL AND i.fines != 0))
+            -- WHERE
+            --     ((i.guarantee IS NOT NULL AND i.guarantee != 0)
+            --     OR
+            --     (i.tax IS NOT NULL AND i.tax != 0)
+            --     OR
+            --     (i.publish IS NOT NULL AND i.publish != 0)
+            --     OR
+            --     (i.fines IS NOT NULL AND i.fines != 0))
                 ";
 
         // Add filtering by swift_id if provided
@@ -83,7 +84,8 @@ switch ($method) {
                 'guarantee' => $row['guarantee'],
                 'tax' => $row['tax'],
                 'publish' => $row['publish'],
-                'fines' => $row['fines']
+                'fines' => $row['fines'],
+                'tax_bint' => $row['tax_bint']
             ];
         }
 
